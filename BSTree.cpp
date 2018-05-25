@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <queue>
 #include "BSTree.h"
 
 using namespace std;
@@ -19,58 +20,107 @@ BSTree::~BSTree()
 	this->_root = NULL;
 }
 
-Node* BSTree::getRoot() {
+Node* BSTree::root() {
 	return this->_root;
 }
 
-void BSTree::setRoot(Node*& root) {
-	this->_root = root;
-}
-
-void BSTree::insert(const int& data) {
-	Node* root = this->getRoot();
-	if (root == NULL) {
-		Node* n = new Node(data);
-		this->setRoot(n);
+void BSTree::add(const int data) {
+	Node* root = this->root();
+	Node* n = new Node(data);
+	if (root == NULL) {		
+		this->_setRoot(n);
 	}
 	else {
-		this->_insert(data, root);
+		this->_add(n, root);
 	}
 }
 
-Node* BSTree::search(const int& data) {
-	return this->_search(data, this->getRoot());
+void BSTree::remove(const int data) {
+	Node* location = NULL;
+	Node* parent = NULL;
+	this->find(data, location, parent);
+	this->_remove(location, parent);
+	
+}
+
+void BSTree::find(const int data, Node*& location, Node*& parent)
+{
+	location = NULL;
+	parent = NULL;
+	Node* startNode = this->root();
+	Node* parentOfStartNode = NULL;
+	if (startNode) {
+		this->_find(data, startNode, parentOfStartNode, location, parent);
+	}
+}
+
+void  BSTree::findSmallest(Node*& location, Node*& parent) {
+	location = NULL;
+	parent = NULL;
+	Node* startNode = this->root();
+	Node* parentOfStartNode = NULL;
+	if (startNode) {
+		this->_findSmallest(startNode, parentOfStartNode, location, parent);
+	}
+}
+
+void  BSTree::findLargest(Node*& location, Node*& parent) {
+	location = NULL;
+	parent = NULL;
+	Node* startNode = this->root();
+	Node* parentOfStartNode = NULL;
+	if (startNode) {
+		this->_findLargest(startNode, parentOfStartNode, location, parent);
+	}
 }
 
 int BSTree::height() {
-	return this->_height(this->getRoot()) - 1;
+	return this->_height(this->root()) - 1;
 }
 
-void BSTree::_insert(const int& data, Node*& node) {
-	Node* n = new Node(data);
-	this->_insert(n, node);	
-}
-
-void BSTree::print(const bool isHorizontal) {
-	std::string retStr = "";
-	Node* root = this->getRoot();
-	if(root != NULL){
-		if (isHorizontal == true) {
-			retStr = this->_printHorizontal(root);
-		}
-		else {
-			retStr = this->_printVertical(root);
+std::vector<Node*> BSTree::traverse(const TraverseType traverseType) {
+	std::vector<Node*> nodesList;
+	Node* root = this->root();
+	if (root) {
+		int type = (int)traverseType;
+		switch (type) {
+			case (TraverseType::DFSInOrder):
+			{
+				this->_traverse_DFSInOrder(root, nodesList);
+				break;
+			}
+			case(TraverseType::DFSPreOrder):
+			{
+				this->_traverse_DFSPreOrder(root, nodesList);
+				break;
+			}
+			case(TraverseType::DFSPostOrder):
+			{
+				this->_traverse_DFSPostOrder(root, nodesList);
+				break;
+			}
+			case(TraverseType::BFS):
+			{
+				this->_traverse_BFS(root, nodesList);
+				break;
+			}
 		}
 	}
-	std::cout << retStr << std::endl;
+
+	return nodesList;
 }
 
-void BSTree::_insert(Node*& nodeToBeInstrted, Node*& atNode) {
+void BSTree::_setRoot(Node* root) {
+	this->_root = root;
+}
+
+// private functions
+void BSTree::_add(Node*& nodeToBeInstrted, Node*& atNode) {
 	if ((nodeToBeInstrted != NULL) && (atNode != NULL)) {
 		if (atNode->getData() > nodeToBeInstrted->getData()) {
 			Node* left = atNode->getLeft();
 			if (left != NULL) {
-				this->_insert(nodeToBeInstrted, left);
+				this->_add(nodeToBeInstrted, left);
 			}
 			else {
 				atNode->setLeft(nodeToBeInstrted);
@@ -79,7 +129,7 @@ void BSTree::_insert(Node*& nodeToBeInstrted, Node*& atNode) {
 		else {
 			Node* right = atNode->getRight();
 			if (right != NULL) {
-				this->_insert(nodeToBeInstrted, right);
+				this->_add(nodeToBeInstrted, right);
 			}
 			else {
 				atNode->setRight(nodeToBeInstrted);
@@ -88,21 +138,103 @@ void BSTree::_insert(Node*& nodeToBeInstrted, Node*& atNode) {
 	}
 }
 
-Node* BSTree::_search(const int& data, Node* node) {
-	Node* _found = NULL;
-	if (node != NULL) {
-		int _data = node->getData();
+void  BSTree::_find(const int data, Node* startNode, Node* parentOfStartNode, Node*& location, Node*& parent) {
+	if (startNode != NULL) {
+		int _data = startNode->getData();
 		if (_data == data) {
-			_found = node;
+			location = startNode;
+			parent = parentOfStartNode;
 		}
 		else if (_data > data) {
-			_found = this->_search(data, node->getLeft());
+			Node* left = startNode->getLeft();
+			if (left) {
+				this->_find(data, left, startNode, location, parent);
+			}
 		}
 		else {
-			_found = this->_search(data, node->getRight());
+			Node* right = startNode->getRight();
+			if (right) {
+				this->_find(data, right, startNode, location, parent);
+			}
 		}
 	}
-	return _found;
+}
+
+void BSTree::_remove(Node*& location, Node*& parent) {
+	if (location) {
+		// Case 1:  No child
+		Node* left = location->getLeft();
+		Node* right = location->getRight();
+		if (left == NULL && right == NULL) {
+			if (parent->getLeft() == location) {
+				parent->setLeft(NULL);
+			}
+			if (parent->getRight() == location) {
+				parent->setRight(NULL);
+			}
+			delete location;
+			location = NULL;
+		}
+		//Case 2a: One child - left is null
+		else if (left == NULL) {
+			if (parent->getLeft() == location) {
+				parent->setLeft(location->getRight());
+			}
+			if (parent->getRight() == location) {
+				parent->setRight(location->getRight());
+			}
+			location->setRight(NULL);
+			delete location;
+			location = NULL;
+		}
+		//Case 2b: One child - right is null
+		else if (right == NULL) {
+			if (parent->getLeft() == location) {
+				parent->setLeft(location->getLeft());
+			}
+			if (parent->getRight() == location) {
+				parent->setRight(location->getLeft());
+			}
+			location->setLeft(NULL);
+			delete location;
+			location = NULL;
+		}
+		// case 3: Two children
+		else {
+			Node* smallestInRightTree = NULL;
+			Node* parentOfSmallest = NULL;
+			// find the smallest in the right side of the tree
+			this->_findSmallest(location->getRight(), parent, smallestInRightTree, parentOfSmallest);
+			location->setData(smallestInRightTree->getData());
+			this->_remove(smallestInRightTree, parentOfSmallest);
+		}
+	}
+}
+
+void  BSTree::_findSmallest(Node* startNode, Node* startParentNode, Node*& location, Node*& parent) {
+	if (startNode != NULL) {
+		Node* left = startNode->getLeft();
+		if (left == NULL) {
+			location = startNode;
+			parent = startParentNode;
+		}
+		else {
+			_findSmallest(left, startNode, location, parent);
+		}
+	}
+}
+
+void  BSTree::_findLargest(Node* startNode, Node* startParentNode, Node*& location, Node*& parent) {
+	if (startNode != NULL) {
+		Node* right = startNode->getRight();
+		if (right == NULL) {
+			location = startNode;
+			parent = startParentNode;
+		}
+		else {
+			_findLargest(right, startNode, location, parent);
+		}
+	}
 }
 
 int BSTree::_height(Node* node) {
@@ -125,137 +257,67 @@ int BSTree::_height(Node* node) {
 	return height;
 }
 
-struct Trunk
-{
-	Trunk *prev;
-	string str;
-
-	Trunk(Trunk *prev, string str)
-	{
-		this->prev = prev;
-		this->str = str;
-	}
-};
-
-// Helper function to print branches of the binary tree
-void showTrunks(Trunk *p)
-{
-	if (p == NULL)
-		return;
-
-	showTrunks(p->prev);
-
-	std::cout << p->str;
-}
-
-void printTree(Node *root, Trunk *prev, bool isLeft)
-{
-	if (root == NULL)
-		return;
-
-	string prev_str = "	";
-	Trunk *trunk = new Trunk(prev, prev_str);
-
-	printTree(root->getLeft(), trunk, true);
-
-	if (!prev)
-		trunk->str = "---";
-	else if (isLeft)
-	{
-		trunk->str = ".---";
-		prev_str = "   |";
-	}
-	else
-	{
-		trunk->str = "`---";
-		prev->str = prev_str;
-	}
-
-	showTrunks(trunk);
-	cout << root->getData() << endl;
-
-	if (prev)
-		prev->str = prev_str;
-	trunk->str = "   |";
-
-	printTree(root->getRight(), trunk, false);
-}
-
-std::string BSTree::_printHorizontal(Node* node) {
-	std::string retStr = "";
-	printTree(node, NULL, false);
-	return retStr;
-}
-
-std::string BSTree::_printVertical(Node* node) {
-	int _width = 0;
-	return this->_printVertical(node, _width);
-}
-
-std::string BSTree::_printVertical(Node* node, int& width) {
-	std::string retStr = "";
-	std::vector<std::string> listStr = this->_printV(node, width);
-	int size = listStr.size();
-	for (int i = 0; i < size; i++) {
-		retStr = retStr + listStr[i] + "\n";
-	}	
-	return retStr;
-}
-
-std::vector<std::string> BSTree::_printV(Node* node, int& width) {
-	std::vector<std::string> listStr;
+// DFSInOrder: LNR(Left-Node-Right)
+void BSTree::_traverse_DFSInOrder(Node* node, std::vector<Node*>& nodesList) {	
 	if (node) {
 		Node* left = node->getLeft();
 		Node* right = node->getRight();
-
-		std::vector<std::string> listStrLeft, listStrRight;
-		int leftWidth = 0, rightWidth = 0, maxChildrenWidth = 0;
-		std::string nodeStr = "";
-		if (left == NULL && right == NULL) {
-			width = NUMBER_WIDTH;
-			listStr.push_back(std::to_string(node->getData()));
+		if (left) {
+			this->_traverse_DFSInOrder(left, nodesList);
 		}
-		else {
-
-			listStrLeft = this->_printV(left, leftWidth);
-			listStrRight = this->_printV(right, rightWidth);
-			maxChildrenWidth = (leftWidth > rightWidth) ? leftWidth : rightWidth;
-			width = 2* maxChildrenWidth + SPACE_WIDTH;
-			int width_space = maxChildrenWidth + SPACE_WIDTH;
-			std::string newLineStr = "\n", verticalLineStr = "|", horizontalLineStr = "-", plusStr = "+",
-				spaceStr = " ";
-			int halfWidth = width_space / 2;
-
-			listStr.push_back(this->_getStrWithWidth(spaceStr, maxChildrenWidth/2) + this->_getStrWithWidth(spaceStr, halfWidth) + std::to_string(node->getData()));
-			listStr.push_back(this->_getStrWithWidth(spaceStr, maxChildrenWidth/2) + this->_getStrWithWidth(spaceStr, halfWidth) + verticalLineStr);
-			listStr.push_back(this->_getStrWithWidth(spaceStr, maxChildrenWidth/2) + this->_getStrWithWidth(horizontalLineStr, width_space));
-			listStr.push_back(this->_getStrWithWidth(spaceStr, maxChildrenWidth/2) + verticalLineStr + 
-				              this->_getStrWithWidth(spaceStr, (width_space - NUMBER_WIDTH)) + verticalLineStr);
-
-			int sizeLeft = listStrLeft.size(), 
-				sizeRight = listStrRight.size();
-			int sizeMax = (sizeLeft > sizeRight) ? sizeLeft : sizeRight,
-				sizeMin = (sizeLeft > sizeRight) ? sizeRight : sizeLeft;
-			
-			for (int i = 0; i < sizeMax; i++) {
-				std::string tempLeftStr = (i < sizeLeft) ? listStrLeft[i] : " ";
-				std::string tempRightStr = (i < sizeRight) ? listStrRight[i] : " ";
-				listStr.push_back(tempLeftStr + this->_getStrWithWidth(spaceStr, SPACE_WIDTH) + tempRightStr);
-			}			
-		}	
+		nodesList.push_back(node);
+		if(right){
+			this->_traverse_DFSInOrder(right, nodesList);
+		}
 	}
-	else {
-		width = 0;
-	}
-	return listStr;
 }
 
-std::string BSTree::_getStrWithWidth(const std::string str, const int width) {
-	std::string retStr = "";
-	for (int i = 0; i < width; i++) {
-		retStr = retStr + str;
+// DFSPreOrder: NLR(Node-Left-Right)
+void BSTree::_traverse_DFSPreOrder(Node* node, std::vector<Node*>& nodesList) {
+	if (node) {
+		Node* left = node->getLeft();
+		Node* right = node->getRight();
+		nodesList.push_back(node);
+		if (left) {
+			this->_traverse_DFSPreOrder(left, nodesList);
+		}
+		if (right) {
+			this->_traverse_DFSPreOrder(right, nodesList);
+		}
 	}
-	return retStr;
 }
 
+// DFSPostOrder: LRN(Left-Right-Node)
+void BSTree::_traverse_DFSPostOrder(Node* node, std::vector<Node*>& nodesList) {
+	if (node) {
+		Node* left = node->getLeft();
+		Node* right = node->getRight();
+		if (left) {
+			this->_traverse_DFSPostOrder(left, nodesList);
+		}
+		if (right) {
+			this->_traverse_DFSPostOrder(right, nodesList);
+		}
+		nodesList.push_back(node);		
+	}
+}
 
+void BSTree::_traverse_BFS(Node* node, std::vector<Node*>& nodesList) {
+	std::queue<Node*> tempQ;
+	if (node) {
+		tempQ.push(node);
+		while (!(tempQ.empty())) {			
+			Node* tempNode = tempQ.front();
+			nodesList.push_back(tempNode);
+			Node* left = tempNode->getLeft();
+			Node* right = tempNode->getRight();
+			if (left) {
+				tempQ.push(left);
+			}
+			if (right) {
+				tempQ.push(right);
+			}
+			tempQ.pop();
+		}
+	}
+}
