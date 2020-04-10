@@ -75,7 +75,7 @@ void  BSTree::findLargest(Node*& location, Node*& parent) {
 }
 
 int BSTree::height() {
-	return this->_height(this->root()) - 1;
+	return this->_height(this->root());
 }
 
 std::vector<Node*> BSTree::traverse(const TraverseType traverseType) {
@@ -240,18 +240,17 @@ void  BSTree::_findLargest(Node* startNode, Node* startParentNode, Node*& locati
 int BSTree::_height(Node* node) {
 	int height = 0;
 	if (node != NULL) {
-		height = 1;
-
 		int l = 0, r = 0;
 		Node* lNode = node->getLeft();
 		Node* rNode = node->getRight();
 		if (lNode != NULL) {
+			height = 1;
 			l = this->_height(lNode);
 		}
 		if (rNode != NULL) {
+			height = 1;
 			r = this->_height(rNode);
 		}
-
 		height = height + ((l > r) ? l : r);
 	}
 	return height;

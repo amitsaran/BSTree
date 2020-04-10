@@ -6,8 +6,9 @@ using namespace std;
 void _printVector(std::vector<Node*> list, std::string str);
 
 int main() {
-
+	int height = 0;
 	BSTree* bst = new BSTree();
+	height = bst->height();
 	//
 	//                       25
 	//            ------------------------
@@ -36,7 +37,7 @@ int main() {
 	bst->add(66);
 	bst->add(90);
 
-	int height = bst->height();
+	height = bst->height();
 	std::cout << "BST: " << "Height is " << height << std::endl;
 
 	//int dataToSearch = 25;
