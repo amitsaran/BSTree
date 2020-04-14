@@ -114,7 +114,7 @@ void BSTree::_setRoot(Node* root) {
 
 // private functions
 void BSTree::_add(Node*& nodeToBeInserted, Node*& atNode) {
-	if ((nodeToBeInserted == NULL) || (root == NULL)) {
+	if ((nodeToBeInserted == NULL) || (atNode == NULL)) {
 		return;
 	}
 	if (atNode->getData() > nodeToBeInserted->getData()) {
