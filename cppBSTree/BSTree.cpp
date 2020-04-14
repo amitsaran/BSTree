@@ -113,25 +113,25 @@ void BSTree::_setRoot(Node* root) {
 }
 
 // private functions
-void BSTree::_add(Node*& nodeToBeInstrted, Node*& atNode) {
-	if ((nodeToBeInstrted == NULL) || (atNode == NULL)) {
+void BSTree::_add(Node*& nodeToBeInserted, Node*& atNode) {
+	if ((nodeToBeInserted == NULL) || (root == NULL)) {
 		return;
 	}
-	if (atNode->getData() > nodeToBeInstrted->getData()) {
+	if (atNode->getData() > nodeToBeInserted->getData()) {
 		Node* left = atNode->getLeft();
 		if (left != NULL) {
-			this->_add(nodeToBeInstrted, left);
+			this->_add(nodeToBeInserted, left);
 		}
 		else {
-			atNode->setLeft(nodeToBeInstrted);
+			atNode->setLeft(nodeToBeInserted);
 		}
 	} else {
 		Node* right = atNode->getRight();
 		if (right != NULL) {
-			this->_add(nodeToBeInstrted, right);
+			this->_add(nodeToBeInserted, right);
 		}
 		else {
-			atNode->setRight(nodeToBeInstrted);
+			atNode->setRight(nodeToBeInserted);
 		}
 	}
 }
@@ -304,7 +304,7 @@ void BSTree::_traverse_DFSPostOrder(Node* node, std::vector<Node*>& nodesList) {
 
 void BSTree::_traverse_BFS(Node* node, std::vector<Node*>& nodesList) {
 	std::queue<Node*> tempQ;
-	if (node = NULL) {
+	if (node == NULL) {
 		return;
 	}
 	tempQ.push(node);
