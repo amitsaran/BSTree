@@ -1,5 +1,9 @@
 {
     "version": "0.2.0",
+    "env": {
+        "myDefaultIncludePath": ["${workspaceFolder}", "${workspaceFolder}/include"],
+        "myCompilerPath": "/usr/local/bin/gcc-7"
+      },
         "configurations": [
             {
                 "name": "(gdb) Launch",

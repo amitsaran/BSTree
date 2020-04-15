@@ -1,4 +1,6 @@
 *
+!include**/
+!src**/
 !*.cpp
 !*.hpp
 !*.h

@@ -8,6 +8,8 @@
             "args": [
                 "-g",
                 "${fileDirname}/*.cpp",
+                "-I",
+                "${workspaceFolder}/include",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],            
