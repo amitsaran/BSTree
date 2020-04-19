@@ -1,0 +1,10 @@
+*
+!include**/
+!src**/
+!*.cpp
+!*.hpp
+!*.h
+!*.md
+!.gitignore
+!.vscode
+!.vscode/*
