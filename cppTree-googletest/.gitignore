@@ -6,6 +6,7 @@
 !*.hpp
 !*.h
 !*.md
+!CMakeLists.txt
 !.gitignore
 !.vscode
 !.vscode/*
